@@ -1,12 +1,12 @@
 fastapi
 uvicorn
-tensorflow-cpu
 deepface
 tf-keras
-opencv-python-headless
+opencv-python
 sqlalchemy
 python-multipart
 pydantic
 numpy
 requests
 python-dotenv
+    

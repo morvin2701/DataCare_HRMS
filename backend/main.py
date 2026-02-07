@@ -16,7 +16,12 @@ app = FastAPI(title="DataCare HRMS Face Recognition API")
 # CORS setup
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allow all origins for dev
+    allow_origins=[
+        "http://localhost:5173",
+        "http://localhost:5175",
+        "https://datacare-hrms-frontend.vercel.app",
+        "https://datacare-hrms-frontend.vercel.app/"
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

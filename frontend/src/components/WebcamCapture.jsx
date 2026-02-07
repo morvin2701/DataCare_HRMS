@@ -75,14 +75,15 @@ const WebcamCapture = ({ onCapture }) => {
                             height: 720,
                             facingMode: "user"
                         }}
+                        playsInline={true}
                     />
                 )}
 
                 {/* Status Badge */}
                 <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20">
                     <div className={`px-6 py-2 rounded-full flex items-center gap-2 backdrop-blur-xl ${imageSrc
-                            ? 'bg-green-500/20 border-2 border-green-400'
-                            : 'bg-blue-500/20 border-2 border-blue-400'
+                        ? 'bg-green-500/20 border-2 border-green-400'
+                        : 'bg-blue-500/20 border-2 border-blue-400'
                         }`}>
                         <div className={`w-2 h-2 rounded-full ${imageSrc ? 'bg-green-400' : 'bg-blue-400 animate-pulse'
                             }`}></div>
