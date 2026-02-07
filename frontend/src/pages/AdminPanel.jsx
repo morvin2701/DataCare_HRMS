@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import config from '../config';
 import axios from 'axios';
 import { Users, Trash2, Edit, Shield, TrendingUp, Activity, UserCheck, Search, LogOut, XCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -30,8 +31,8 @@ const AdminPanel = () => {
     const fetchData = async () => {
         try {
             const [usersRes, statsRes] = await Promise.all([
-                axios.get('http://localhost:8000/users'),
-                axios.get('http://localhost:8000/stats')
+                axios.get(`${config.API_URL}/users`),
+                axios.get(`${config.API_URL}/stats`)
             ]);
             setUsers(usersRes.data);
             setStats(statsRes.data);
@@ -44,7 +45,7 @@ const AdminPanel = () => {
 
     const fetchUserAttendance = async (userId) => {
         try {
-            const res = await axios.get(`http://localhost:8000/attendance`);
+            const res = await axios.get(`${config.API_URL}/attendance`);
             // Filter client side for now as API returns all (should optimize later)
             const userRecords = res.data.filter(r => r.user_id === userId);
             setUserAttendance(userRecords);
@@ -57,7 +58,7 @@ const AdminPanel = () => {
         try {
             const formData = new FormData();
             formData.append('role', newRole);
-            await axios.put(`http://localhost:8000/users/${userId}`, formData);
+            await axios.put(`${config.API_URL}/users/${userId}`, formData);
             setEditingUser(null);
             fetchData();
         } catch (error) {
@@ -73,7 +74,7 @@ const AdminPanel = () => {
     const executeDelete = async () => {
         if (!selectedUser) return;
         try {
-            await axios.delete(`http://localhost:8000/users/${selectedUser.id}`);
+            await axios.delete(`${config.API_URL}/users/${selectedUser.id}`);
             setShowDeleteModal(false);
             setSelectedUser(null);
             fetchData();

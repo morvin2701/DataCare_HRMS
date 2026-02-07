@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import config from '../config';
 import { useAuth } from '../context/AuthContext';
 import { Users, Clock, TrendingUp, Activity, ChevronRight, Calendar, CheckCircle2 } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -19,7 +20,7 @@ const EmployeeDashboard = () => {
 
     const fetchData = async () => {
         try {
-            const response = await axios.get('http://localhost:8000/attendance');
+            const response = await axios.get(`${config.API_URL}/attendance`);
             const myAttendance = response.data.filter(r => r.user_id === user.id);
 
             // Calculate stats

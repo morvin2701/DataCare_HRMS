@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { LogIn, Mail, Shield, Sparkles, ArrowRight, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import config from '../config';
 import axios from 'axios';
 
 const Login = () => {
@@ -19,7 +20,7 @@ const Login = () => {
 
         try {
             // Find user by email
-            const response = await axios.get('http://localhost:8000/users');
+            const response = await axios.get(`${config.API_URL}/users`);
             const user = response.data.find(u => u.email === email);
 
             if (!user) {

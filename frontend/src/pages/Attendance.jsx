@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import config from '../config';
 import WebcamCapture from '../components/WebcamCapture';
 import { Camera, Clock, CheckCircle, XCircle, Loader, Zap, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -22,7 +23,7 @@ const Attendance = () => {
             formData.append('type', attendanceType);
             formData.append('file', capturedImage);
 
-            const response = await axios.post('http://localhost:8000/recognize', formData);
+            const response = await axios.post(`${config.API_URL}/recognize`, formData);
             setMessage({
                 type: 'success',
                 text: response.data.message,
@@ -108,8 +109,8 @@ const Attendance = () => {
                                     whileTap={{ scale: 0.95 }}
                                     onClick={() => setAttendanceType('IN')}
                                     className={`p-6 rounded-2xl font-bold text-lg transition-all duration-300 ${attendanceType === 'IN'
-                                            ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-2xl shadow-green-500/50 scale-105'
-                                            : 'bg-white/5 text-slate-400 hover:bg-white/10 border border-white/10'
+                                        ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-2xl shadow-green-500/50 scale-105'
+                                        : 'bg-white/5 text-slate-400 hover:bg-white/10 border border-white/10'
                                         }`}
                                 >
                                     <div className="flex flex-col items-center gap-3">
@@ -125,8 +126,8 @@ const Attendance = () => {
                                     whileTap={{ scale: 0.95 }}
                                     onClick={() => setAttendanceType('OUT')}
                                     className={`p-6 rounded-2xl font-bold text-lg transition-all duration-300 ${attendanceType === 'OUT'
-                                            ? 'bg-gradient-to-r from-red-500 to-orange-600 text-white shadow-2xl shadow-red-500/50 scale-105'
-                                            : 'bg-white/5 text-slate-400 hover:bg-white/10 border border-white/10'
+                                        ? 'bg-gradient-to-r from-red-500 to-orange-600 text-white shadow-2xl shadow-red-500/50 scale-105'
+                                        : 'bg-white/5 text-slate-400 hover:bg-white/10 border border-white/10'
                                         }`}
                                 >
                                     <div className="flex flex-col items-center gap-3">
@@ -167,8 +168,8 @@ const Attendance = () => {
                                     animate={{ opacity: 1, scale: 1, y: 0 }}
                                     exit={{ opacity: 0, scale: 0.9, y: -20 }}
                                     className={`p-6 rounded-2xl ${message.type === 'success'
-                                            ? 'bg-gradient-to-r from-green-500/20 to-emerald-500/20 border-2 border-green-500/30'
-                                            : 'bg-gradient-to-r from-red-500/20 to-orange-500/20 border-2 border-red-500/30'
+                                        ? 'bg-gradient-to-r from-green-500/20 to-emerald-500/20 border-2 border-green-500/30'
+                                        : 'bg-gradient-to-r from-red-500/20 to-orange-500/20 border-2 border-red-500/30'
                                         }`}
                                 >
                                     <div className="flex items-start gap-4">

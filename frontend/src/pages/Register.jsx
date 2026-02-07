@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import config from '../config';
 import WebcamCapture from '../components/WebcamCapture';
 import { UserPlus, Mail, Briefcase, User, CheckCircle, AlertCircle, Sparkles, Shield, ArrowRight, Camera } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -43,7 +44,8 @@ const Register = () => {
             formData.append('file', capturedImage);
 
             // Register user
-            const response = await axios.post('http://localhost:8000/register', formData);
+            // Register user
+            const response = await axios.post(`${config.API_URL}/register`, formData);
 
             // If successful, log them in automatically
             if (response.status === 200 || response.status === 201) {

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import config from '../config';
 import axios from 'axios';
 import { Users, Clock, TrendingUp, Activity, Calendar, CheckCircle2, XCircle, Search, Filter } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -26,8 +27,8 @@ const ManagerDashboard = () => {
             // In a real app, we would fetch only team members
             // For now, we fetch all users and filter by 'employee' role to simulate team view
             const [usersRes, attendanceRes] = await Promise.all([
-                axios.get('http://localhost:8000/users'),
-                axios.get('http://localhost:8000/attendance')
+                axios.get(`${config.API_URL}/users`),
+                axios.get(`${config.API_URL}/attendance`)
             ]);
 
             const employees = usersRes.data.filter(u => u.role === 'employee');
