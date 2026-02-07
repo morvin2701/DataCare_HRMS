@@ -1,8 +1,9 @@
 fastapi
 uvicorn
+tensorflow-cpu
 deepface
 tf-keras
-opencv-python
+opencv-python-headless
 sqlalchemy
 python-multipart
 pydantic
