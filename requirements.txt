@@ -1,0 +1,12 @@
+fastapi
+uvicorn
+deepface
+tf-keras
+opencv-python
+sqlalchemy
+python-multipart
+pydantic
+numpy
+requests
+python-dotenv
+    
