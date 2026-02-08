@@ -13,16 +13,11 @@ models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="DataCare HRMS Face Recognition API")
 
-# CORS setup
+# CORS setup - Allow all origins for cross-device access
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "http://localhost:5175",
-        "https://datacare-hrms-frontend.vercel.app",
-        "https://datacare-hrms-frontend.vercel.app/"
-    ],
-    allow_credentials=True,
+    allow_origins=["*"],  # Allow all origins
+    allow_credentials=False,  # Must be False when using allow_origins=["*"]
     allow_methods=["*"],
     allow_headers=["*"],
 )
