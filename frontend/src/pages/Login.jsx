@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { LogIn, Mail, Shield, Sparkles, ArrowRight, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { LogIn, Mail, Shield, Sparkles, ArrowRight, AlertCircle, CheckCircle2, Lock } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import config from '../config';
 import axios from 'axios';
 
 const Login = () => {
     const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const { login } = useAuth();
@@ -29,6 +30,13 @@ const Login = () => {
                 return;
             }
 
+            // Validate password
+            if (user.password !== password) {
+                setError('Incorrect password. Please try again.');
+                setLoading(false);
+                return;
+            }
+
             // Login successful
             login(user);
 
@@ -43,7 +51,7 @@ const Login = () => {
                 } else {
                     navigate('/employee');
                 }
-            }, 500);
+            }, 800);
         } catch (err) {
             setError('Login failed. Please try again.');
             setLoading(false);
@@ -51,181 +59,169 @@ const Login = () => {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center p-6 relative overflow-hidden">
-            {/* Enhanced Background Elements */}
-            <div className="absolute inset-0 -z-10">
-                <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500/30 rounded-full blur-3xl animate-pulse"></div>
-                <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/30 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-indigo-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
+        <div className="min-h-screen flex items-center justify-center p-4 sm:p-6 relative overflow-hidden">
+            {/* Background Elements */}
+            <div className="fixed inset-0 -z-10 pointer-events-none">
+                <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-blue-600/20 rounded-full blur-[120px] animate-pulse-slow"></div>
+                <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-purple-600/20 rounded-full blur-[120px] animate-pulse-slow delay-1000"></div>
             </div>
 
-            <motion.div
-                initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                transition={{ duration: 0.5 }}
-                className="w-full max-w-md relative"
-            >
-                {/* Decorative Elements */}
-                <div className="absolute -top-24 -left-24 w-48 h-48 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-full blur-2xl"></div>
-                <div className="absolute -bottom-24 -right-24 w-48 h-48 bg-gradient-to-br from-indigo-500/20 to-pink-500/20 rounded-full blur-2xl"></div>
-
-                {/* Logo & Header */}
+            <div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+                {/* Left Column: Branding & Info (Hidden on mobile, visible on lg) */}
                 <motion.div
-                    initial={{ opacity: 0, y: -20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.2 }}
-                    className="text-center mb-10"
+                    initial={{ opacity: 0, x: -50 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.6 }}
+                    className="hidden lg:flex flex-col justify-center h-full p-12 relative"
                 >
-                    <motion.div
-                        animate={{
-                            scale: [1, 1.05, 1],
-                            rotate: [0, 5, -5, 0]
-                        }}
-                        transition={{
-                            duration: 3,
-                            repeat: Infinity,
-                            ease: "easeInOut"
-                        }}
-                        className="inline-block mb-6"
-                    >
-                        <div className="relative">
-                            <div className="absolute inset-0 bg-gradient-to-br from-blue-500 via-indigo-600 to-purple-600 rounded-3xl blur-xl opacity-75 animate-pulse"></div>
-                            <div className="relative w-20 h-20 bg-gradient-to-br from-blue-500 via-indigo-600 to-purple-600 rounded-3xl flex items-center justify-center shadow-2xl shadow-blue-500/50">
-                                <Shield className="text-white" size={40} />
-                            </div>
-                        </div>
-                    </motion.div>
+                    <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-[3rem] blur-3xl -z-10"></div>
 
-                    <h1 className="text-6xl font-black mb-3">
-                        <span className="bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400 bg-clip-text text-transparent">
-                            Welcome Back
+                    <div className="mb-8 relative">
+                        <div className="absolute -left-4 -top-4 w-20 h-20 bg-blue-500/30 rounded-full blur-xl"></div>
+                        <div className="relative w-24 h-24 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-3xl flex items-center justify-center shadow-2xl shadow-blue-500/30 mb-8 border border-white/10">
+                            <Shield className="text-white transform scale-110" size={48} />
+                        </div>
+                    </div>
+
+                    <h1 className="text-6xl font-black text-white mb-6 leading-tight">
+                        Welcome to <br />
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400">
+                            DataCare HRMS
                         </span>
                     </h1>
-                    <p className="text-slate-400 text-lg flex items-center justify-center gap-2">
-                        <Sparkles size={18} className="text-yellow-400 animate-pulse" />
-                        Login to access your HRMS dashboard
+
+                    <p className="text-xl text-slate-300 mb-12 leading-relaxed max-w-lg">
+                        Securely access your dashboard, track attendance, and manage your profile with our advanced AI-powered platform.
                     </p>
+
+                    <div className="grid grid-cols-2 gap-6">
+                        <div className="glass-panel p-6 rounded-2xl border border-white/5 bg-white/5 backdrop-blur-sm">
+                            <Sparkles className="text-yellow-400 mb-3" size={32} />
+                            <h3 className="text-white font-bold text-lg mb-1">AI Powered</h3>
+                            <p className="text-slate-400 text-sm">Smart face recognition logic</p>
+                        </div>
+                        <div className="glass-panel p-6 rounded-2xl border border-white/5 bg-white/5 backdrop-blur-sm">
+                            <Lock className="text-emerald-400 mb-3" size={32} />
+                            <h3 className="text-white font-bold text-lg mb-1">Secure</h3>
+                            <p className="text-slate-400 text-sm">Enterprise-grade security</p>
+                        </div>
+                    </div>
                 </motion.div>
 
-                {/* Login Card */}
+                {/* Right Column: Login Form */}
                 <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.3 }}
-                    className="glass-panel p-10 relative overflow-hidden"
+                    initial={{ opacity: 0, x: 50 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.6, delay: 0.2 }}
+                    className="w-full max-w-md mx-auto"
                 >
-                    {/* Animated Border */}
-                    <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 opacity-20 blur-xl"></div>
+                    <div className="glass-panel p-8 md:p-10 rounded-[2.5rem] shadow-2xl relative overflow-hidden border border-white/10 bg-black/40 backdrop-blur-xl">
+                        {/* Mobile Logo (Visible only on small screens) */}
+                        <div className="lg:hidden text-center mb-8">
+                            <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg mx-auto mb-4">
+                                <Shield className="text-white" size={32} />
+                            </div>
+                            <h2 className="text-2xl font-bold text-white">Welcome Back</h2>
+                            <p className="text-slate-400 text-sm">Sign in to continue</p>
+                        </div>
 
-                    <div className="relative">
+                        <div className="hidden lg:block mb-10">
+                            <h2 className="text-3xl font-bold text-white mb-2">Sign In</h2>
+                            <p className="text-slate-400">Access your employee dashboard</p>
+                        </div>
+
                         <form onSubmit={handleLogin} className="space-y-6">
-                            {/* Email Input */}
-                            <motion.div
-                                initial={{ opacity: 0, x: -20 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                transition={{ delay: 0.4 }}
-                            >
-                                <label className="block text-sm font-bold text-slate-300 mb-3 flex items-center gap-2">
-                                    <Mail size={18} className="text-blue-400" />
-                                    Email Address
+                            <div className="space-y-2">
+                                <label className="text-sm font-semibold text-slate-300 flex items-center gap-2 ml-1">
+                                    <Mail size={16} className="text-blue-400" />
+                                    Work Email
                                 </label>
-                                <div className="relative group">
+                                <div className="group relative">
                                     <input
                                         type="email"
-                                        className="input-field pr-12 group-hover:border-blue-500/50 transition-all duration-300"
+                                        className="w-full bg-black/20 border border-white/10 text-white px-5 py-4 rounded-xl focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none transition-all placeholder:text-slate-600 group-hover:bg-black/30"
                                         placeholder="name@company.com"
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}
                                         required
                                     />
-                                    <Mail className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 group-hover:text-blue-400 transition-colors" size={20} />
+                                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500 group-focus-within:text-blue-500 transition-colors">
+                                        <div className={`w-2 h-2 rounded-full ${email ? 'bg-emerald-500' : 'bg-slate-500'}`}></div>
+                                    </div>
                                 </div>
-                            </motion.div>
+                            </div>
 
-                            {/* Error Message */}
+                            <div className="space-y-2">
+                                <label className="text-sm font-semibold text-slate-300 flex items-center gap-2 ml-1">
+                                    <Lock size={16} className="text-blue-400" />
+                                    Password
+                                </label>
+                                <div className="group relative">
+                                    <input
+                                        type="password"
+                                        className="w-full bg-black/20 border border-white/10 text-white px-5 py-4 rounded-xl focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none transition-all placeholder:text-slate-600 group-hover:bg-black/30"
+                                        placeholder="Enter your password"
+                                        value={password}
+                                        onChange={(e) => setPassword(e.target.value)}
+                                        required
+                                    />
+                                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500 group-focus-within:text-blue-500 transition-colors">
+                                        <div className={`w-2 h-2 rounded-full ${password ? 'bg-emerald-500' : 'bg-slate-500'}`}></div>
+                                    </div>
+                                </div>
+                            </div>
+
                             <AnimatePresence>
                                 {error && (
                                     <motion.div
-                                        initial={{ opacity: 0, y: -10, scale: 0.95 }}
-                                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                                        exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                                        className="p-4 bg-gradient-to-r from-red-500/20 to-orange-500/20 border-2 border-red-500/30 rounded-2xl flex items-center gap-3"
+                                        initial={{ opacity: 0, y: -10, height: 0 }}
+                                        animate={{ opacity: 1, y: 0, height: 'auto' }}
+                                        exit={{ opacity: 0, y: -10, height: 0 }}
+                                        className="p-4 bg-rose-500/10 border border-rose-500/20 rounded-xl flex items-center gap-3 overflow-hidden"
                                     >
-                                        <AlertCircle className="text-red-400" size={24} />
-                                        <p className="text-red-400 font-semibold">{error}</p>
+                                        <AlertCircle className="text-rose-400 shrink-0" size={20} />
+                                        <p className="text-rose-300 text-sm font-medium">{error}</p>
                                     </motion.div>
                                 )}
                             </AnimatePresence>
 
-                            {/* Login Button */}
                             <motion.button
                                 type="submit"
                                 disabled={loading}
                                 whileHover={{ scale: 1.02 }}
                                 whileTap={{ scale: 0.98 }}
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 0.5 }}
-                                className="btn-primary w-full flex items-center justify-center gap-3 text-lg py-5 relative overflow-hidden group"
+                                className="w-full py-4 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-500 hover:via-indigo-500 hover:to-purple-500 text-white font-bold rounded-xl shadow-lg shadow-blue-500/25 flex items-center justify-center gap-3 transition-all relative overflow-hidden group mt-2"
                             >
-                                <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 shimmer"></div>
+                                <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
                                 {loading ? (
                                     <>
-                                        <div className="w-6 h-6 border-3 border-white/30 border-t-white rounded-full animate-spin"></div>
-                                        <span className="font-bold">Logging in...</span>
+                                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                                        <span>Authenticating...</span>
                                     </>
                                 ) : (
                                     <>
-                                        <LogIn size={24} />
-                                        <span className="font-bold">Login to Dashboard</span>
-                                        <ArrowRight size={24} className="group-hover:translate-x-1 transition-transform" />
+                                        <span>Login to Dashboard</span>
+                                        <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
                                     </>
                                 )}
                             </motion.button>
                         </form>
 
-                        {/* Register Link */}
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            transition={{ delay: 0.6 }}
-                            className="mt-8 text-center"
-                        >
-                            <div className="relative">
-                                <div className="absolute inset-0 flex items-center">
-                                    <div className="w-full border-t border-white/10"></div>
-                                </div>
-                                <div className="relative flex justify-center text-sm">
-                                    <span className="px-4 bg-slate-900/50 text-slate-400">Don't have an account?</span>
-                                </div>
-                            </div>
-
-                            <motion.button
-                                onClick={() => navigate('/register')}
-                                whileHover={{ scale: 1.05 }}
-                                whileTap={{ scale: 0.95 }}
-                                className="mt-6 w-full px-6 py-4 bg-white/5 hover:bg-white/10 border-2 border-white/10 hover:border-blue-500/30 text-white font-bold rounded-2xl transition-all duration-300 flex items-center justify-center gap-2"
-                            >
-                                <CheckCircle2 size={20} className="text-blue-400" />
-                                Register New Account
-                            </motion.button>
-                        </motion.div>
+                        <div className="mt-8 pt-6 border-t border-white/10 text-center">
+                            <p className="text-slate-400 text-sm">
+                                New to DataCare?{' '}
+                                <button
+                                    onClick={() => navigate('/register')}
+                                    className="text-white hover:text-blue-300 font-bold transition-colors inline-flex items-center gap-1 ml-1 group"
+                                >
+                                    Create Account
+                                    <ArrowRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
+                                </button>
+                            </p>
+                        </div>
                     </div>
                 </motion.div>
-
-                {/* Bottom Accent */}
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.7 }}
-                    className="mt-8 text-center"
-                >
-                    <p className="text-sm text-slate-500 flex items-center justify-center gap-2">
-                        <Shield size={14} />
-                        Secured with AI Face Recognition Technology
-                    </p>
-                </motion.div>
-            </motion.div>
+            </div>
         </div>
     );
 };

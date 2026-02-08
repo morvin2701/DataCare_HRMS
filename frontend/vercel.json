@@ -1,7 +1,11 @@
 {
     "rewrites": [
         {
-            "source": "/:path*",
+            "source": "/api/proxy/:match*",
+            "destination": "/api/proxy?__proxy_path=:match*"
+        },
+        {
+            "source": "/(.*)",
             "destination": "/index.html"
         }
     ]

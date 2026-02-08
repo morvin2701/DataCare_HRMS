@@ -6,26 +6,26 @@ import models
 import utils
 import datetime
 from pydantic import BaseModel
-from typing import List, Optional
+from typing import List
 
 # Create tables
 models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="DataCare HRMS Face Recognition API")
 
-# CORS setup - Allow all origins for cross-device access
+# CORS setup
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allow all origins
-    allow_credentials=False,  # Must be False when using allow_origins=["*"]
+    allow_origins=[
+        "http://localhost:5173",
+        "http://localhost:5175",
+        "https://datacare-hrms-frontend.vercel.app",
+        "https://datacare-hrms-frontend.vercel.app/"
+    ],
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-@app.get("/")
-def read_root():
-    # Health check endpoint
-    return {"status": "ok", "message": "DataCare HRMS Backend is running"}
 
 # Pydantic models for responses
 class UserResponse(BaseModel):
@@ -33,8 +33,6 @@ class UserResponse(BaseModel):
     name: str
     email: str
     role: str
-    department: Optional[str] = "General"
-    password: Optional[str] = "123456"
 
     class Config:
         orm_mode = True
@@ -45,7 +43,6 @@ class AttendanceResponse(BaseModel):
     timestamp: datetime.datetime
     type: str
     user_name: str
-    department: Optional[str] = "General"
 
     class Config:
         orm_mode = True
@@ -55,8 +52,6 @@ async def register_user(
     name: str = Form(...),
     email: str = Form(...),
     role: str = Form("employee"),
-    department: str = Form("General"),
-    password: str = Form(...),
     file: UploadFile = File(...),
     db: Session = Depends(get_db)
 ):
@@ -75,8 +70,6 @@ async def register_user(
         name=name,
         email=email,
         role=role,
-        department=department,
-        password=password,
         face_encoding=face_encoding
     )
     db.add(new_user)
@@ -110,8 +103,7 @@ async def recognize_face(
         "message": f"Successfully marked {type} for {user.name}",
         "user": {
             "name": user.name,
-            "role": user.role,
-            "department": user.department
+            "role": user.role
         },
         "timestamp": attendance.timestamp
     }
@@ -128,8 +120,7 @@ def get_attendance(skip: int = 0, limit: int = 100, db: Session = Depends(get_db
             "user_id": record.user_id,
             "timestamp": record.timestamp,
             "type": record.type,
-            "user_name": record.user.name if record.user else "Unknown",
-            "department": record.user.department if record.user else "General"
+            "user_name": record.user.name if record.user else "Unknown"
         })
     return result
 
@@ -151,13 +142,7 @@ def delete_user(user_id: int, db: Session = Depends(get_db)):
     return {"message": f"User {user.name} deleted successfully"}
 
 @app.put("/users/{user_id}")
-def update_user(
-    user_id: int, 
-    name: str = Form(None), 
-    role: str = Form(None), 
-    department: str = Form(None),
-    db: Session = Depends(get_db)
-):
+def update_user(user_id: int, name: str = Form(None), role: str = Form(None), db: Session = Depends(get_db)):
     user = db.query(models.User).filter(models.User.id == user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
@@ -166,8 +151,6 @@ def update_user(
         user.name = name
     if role:
         user.role = role
-    if department:
-        user.department = department
     
     db.commit()
     db.refresh(user)
@@ -183,14 +166,6 @@ def get_stats(db: Session = Depends(get_db)):
     manager_count = db.query(models.User).filter(models.User.role == 'manager').count()
     employee_count = db.query(models.User).filter(models.User.role == 'employee').count()
     
-    # Count by department
-    departments = db.query(models.User.department).distinct().all()
-    dept_stats = {}
-    for (dept,) in departments:
-        if dept:
-            count = db.query(models.User).filter(models.User.department == dept).count()
-            dept_stats[dept] = count
-    
     # Today's attendance
     today = datetime.date.today()
     today_attendance = db.query(models.Attendance).filter(
@@ -205,6 +180,5 @@ def get_stats(db: Session = Depends(get_db)):
             "admin": admin_count,
             "manager": manager_count,
             "employee": employee_count
-        },
-        "users_by_department": dept_stats
+        }
     }

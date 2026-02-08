@@ -3,127 +3,159 @@ import Webcam from 'react-webcam';
 import { Camera, RotateCcw, Check, ScanFace } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const WebcamCapture = ({ onCapture }) => {
+const WebcamCapture = ({ onCapture, isLive = false, paused = false }) => {
     const webcamRef = useRef(null);
+    const onCaptureRef = useRef(onCapture);
     const [imageSrc, setImageSrc] = useState(null);
+    const [isScanning, setIsScanning] = useState(false);
+
+    // Keep onCaptureRef current
+    React.useEffect(() => {
+        onCaptureRef.current = onCapture;
+    }, [onCapture]);
+
+    // Auto-capture for live mode
+    React.useEffect(() => {
+        let interval;
+        if (isLive && !paused && !imageSrc) {
+            setIsScanning(true);
+            interval = setInterval(() => {
+                if (webcamRef.current) {
+                    const imageSrc = webcamRef.current.getScreenshot();
+                    if (imageSrc) {
+                        fetch(imageSrc)
+                            .then(res => res.blob())
+                            .then(blob => {
+                                const file = new File([blob], "capture.jpg", { type: "image/jpeg" });
+                                if (onCaptureRef.current) {
+                                    onCaptureRef.current(file);
+                                }
+                            });
+                    }
+                }
+            }, 2000);
+        }
+        return () => clearInterval(interval);
+    }, [isLive, imageSrc, paused]);
 
     const capture = () => {
+        if (!webcamRef.current) return;
         const imageSrc = webcamRef.current.getScreenshot();
         setImageSrc(imageSrc);
-
-        // Convert base64 to blob for upload
         fetch(imageSrc)
             .then(res => res.blob())
             .then(blob => {
                 const file = new File([blob], "capture.jpg", { type: "image/jpeg" });
-                onCapture(file);
+                if (onCaptureRef.current) onCaptureRef.current(file);
             });
     };
 
     const retake = () => {
         setImageSrc(null);
-        onCapture(null);
+        if (!isLive && onCaptureRef.current) onCaptureRef.current(null);
     };
 
     return (
         <div className="space-y-4">
-            <div className="relative rounded-3xl overflow-hidden border-4 border-white/10 shadow-2xl">
-                {/* Scan Frame Overlay */}
-                {!imageSrc && (
-                    <div className="absolute inset-0 z-10 pointer-events-none">
-                        {/* Corner Brackets */}
-                        <div className="absolute top-4 left-4 w-16 h-16 border-t-4 border-l-4 border-blue-400 rounded-tl-2xl"></div>
-                        <div className="absolute top-4 right-4 w-16 h-16 border-t-4 border-r-4 border-blue-400 rounded-tr-2xl"></div>
-                        <div className="absolute bottom-4 left-4 w-16 h-16 border-b-4 border-l-4 border-blue-400 rounded-bl-2xl"></div>
-                        <div className="absolute bottom-4 right-4 w-16 h-16 border-b-4 border-r-4 border-blue-400 rounded-br-2xl"></div>
+            <motion.div
+                layout
+                className="relative rounded-3xl overflow-hidden shadow-2xl bg-black/40 border border-white/10 group"
+            >
+                {/* 
+                    Changed from aspect-video (16:9) to aspect-[4/3] for taller display
+                    Increased max-height to make camera more prominent
+                */}
+                <div className="relative aspect-[4/3] w-full max-h-[80vh] md:max-h-[750px] overflow-hidden">
+                    {/* Scan Frame Overlay */}
+                    {!imageSrc && (
+                        <div className="absolute inset-0 z-10 pointer-events-none">
+                            {/* Premium Corner Accents */}
+                            <div className="absolute top-6 left-6 w-12 h-12 border-t-2 border-l-2 border-cyan-400 rounded-tl-2xl opacity-60"></div>
+                            <div className="absolute top-6 right-6 w-12 h-12 border-t-2 border-r-2 border-cyan-400 rounded-tr-2xl opacity-60"></div>
+                            <div className="absolute bottom-6 left-6 w-12 h-12 border-b-2 border-l-2 border-cyan-400 rounded-bl-2xl opacity-60"></div>
+                            <div className="absolute bottom-6 right-6 w-12 h-12 border-b-2 border-r-2 border-cyan-400 rounded-br-2xl opacity-60"></div>
 
-                        {/* Scanning Line */}
-                        <motion.div
-                            animate={{ y: ['0%', '100%'] }}
-                            transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
-                            className="absolute left-0 right-0 h-1 bg-gradient-to-r from-transparent via-blue-400 to-transparent shadow-lg shadow-blue-400/50"
-                        />
-
-                        {/* Center Face Icon */}
-                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+                            {/* Scanning Animation */}
                             <motion.div
-                                animate={{ scale: [1, 1.1, 1] }}
-                                transition={{ duration: 2, repeat: Infinity }}
-                                className="w-32 h-32 rounded-full border-4 border-blue-400/30 flex items-center justify-center"
-                            >
-                                <ScanFace className="text-blue-400" size={48} />
-                            </motion.div>
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: [0, 1, 0], top: ['10%', '90%'] }}
+                                transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+                                className="absolute left-[10%] right-[10%] h-[2px] bg-gradient-to-r from-transparent via-cyan-400 to-transparent shadow-[0_0_20px_rgba(34,211,238,0.5)]"
+                            />
+
+                            {/* Center Face Guide - Hidden on tiny screens to save space */}
+                            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 hidden sm:block">
+                                <div className="w-48 h-64 rounded-[3rem] border-2 border-white/10 relative">
+                                    <div className="absolute inset-0 border-2 border-white/20 rounded-[3rem] scale-105 opacity-50"></div>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                )}
+                    )}
 
-                {imageSrc ? (
-                    <motion.img
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        src={imageSrc}
-                        alt="Captured"
-                        className="w-full h-auto"
-                    />
-                ) : (
-                    <Webcam
-                        ref={webcamRef}
-                        screenshotFormat="image/jpeg"
-                        className="w-full h-auto"
-                        videoConstraints={{
-                            width: 1280,
-                            height: 720,
-                            facingMode: "user"
-                        }}
-                        playsInline={true}
-                    />
-                )}
+                    {imageSrc && !isLive ? (
+                        <motion.img
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            src={imageSrc}
+                            alt="Captured"
+                            className="w-full h-full object-cover"
+                        />
+                    ) : (
+                        <Webcam
+                            ref={webcamRef}
+                            screenshotFormat="image/jpeg"
+                            className="w-full h-full object-cover"
+                            videoConstraints={{
+                                facingMode: "user"
+                            }}
+                            playsInline={true}
+                        />
+                    )}
+                </div>
 
-                {/* Status Badge */}
-                <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20">
-                    <div className={`px-6 py-2 rounded-full flex items-center gap-2 backdrop-blur-xl ${imageSrc
-                        ? 'bg-green-500/20 border-2 border-green-400'
-                        : 'bg-blue-500/20 border-2 border-blue-400'
+                {/* Status Badge - Floating */}
+                <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 w-max max-w-[90%]">
+                    <div className={`px-4 py-2 rounded-full flex items-center gap-2 backdrop-blur-md border shadow-lg ${imageSrc && !isLive
+                        ? 'bg-emerald-500/20 border-emerald-500/30'
+                        : 'bg-black/40 border-white/10'
                         }`}>
-                        <div className={`w-2 h-2 rounded-full ${imageSrc ? 'bg-green-400' : 'bg-blue-400 animate-pulse'
+                        <div className={`w-2 h-2 rounded-full ${imageSrc && !isLive ? 'bg-emerald-400' : 'bg-cyan-400 animate-pulse'
                             }`}></div>
-                        <span className={`text-sm font-bold ${imageSrc ? 'text-green-400' : 'text-blue-400'
+                        <span className={`text-xs sm:text-sm font-semibold tracking-wide ${imageSrc && !isLive ? 'text-emerald-400' : 'text-cyan-400'
                             }`}>
-                            {imageSrc ? 'Image Captured' : 'Position Your Face'}
+                            {isLive ? 'LIVE SCANNING' : (imageSrc ? 'CAPTURED' : 'FACE CAMERA')}
                         </span>
                     </div>
                 </div>
-            </div>
+            </motion.div>
 
-            {/* Action Buttons */}
-            <AnimatePresence mode="wait">
-                {imageSrc ? (
-                    <motion.button
-                        key="retake"
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -10 }}
-                        onClick={retake}
-                        className="w-full px-6 py-4 bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-400 hover:to-red-500 text-white font-bold rounded-2xl shadow-xl shadow-orange-500/30 flex items-center justify-center gap-3 transition-all duration-300 hover:scale-105 active:scale-95"
-                    >
-                        <RotateCcw size={20} />
-                        Retake Photo
-                    </motion.button>
-                ) : (
-                    <motion.button
-                        key="capture"
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -10 }}
-                        onClick={capture}
-                        className="w-full px-6 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold rounded-2xl shadow-2xl shadow-blue-500/50 flex items-center justify-center gap-3 transition-all duration-300 hover:scale-105 active:scale-95 relative overflow-hidden"
-                    >
-                        <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 shimmer"></div>
-                        <Camera size={20} />
-                        Capture Face
-                    </motion.button>
-                )}
-            </AnimatePresence>
+            {/* Action Buttons - Only show if NOT live mode */}
+            {!isLive && (
+                <AnimatePresence mode="wait">
+                    {imageSrc ? (
+                        <motion.button
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -10 }}
+                            onClick={retake}
+                            className="w-full py-4 text-white/80 hover:text-white font-medium flex items-center justify-center gap-2 transition-colors group"
+                        >
+                            <RotateCcw size={18} className="group-hover:-rotate-180 transition-transform duration-500" />
+                            Retake Photo
+                        </motion.button>
+                    ) : (
+                        <motion.button
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            onClick={capture}
+                            className="w-full py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold rounded-2xl shadow-lg shadow-blue-500/30 flex items-center justify-center gap-2"
+                        >
+                            <Camera size={20} />
+                            Capture Photo
+                        </motion.button>
+                    )}
+                </AnimatePresence>
+            )}
         </div>
     );
 };
